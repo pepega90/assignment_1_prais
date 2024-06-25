@@ -86,7 +86,7 @@ func (u *UserHandler) UpdateUser(c *gin.Context) {
 		Email string `json:"email" valid:"Required;Email"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error updating user"})
 		return
 	}
 
@@ -105,7 +105,7 @@ func (u *UserHandler) UpdateUser(c *gin.Context) {
 	}
 	updatedUser, err := u.userService.UpdateUser(c, idParam, userReq)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error updating user"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("user id %v updated successfully", updatedUser.ID)})
