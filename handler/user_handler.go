@@ -115,7 +115,7 @@ func (u *UserHandler) DeleteUser(c *gin.Context) {
 	idParam, _ := strconv.Atoi(c.Param("id"))
 	err := u.userService.DeleteUser(c, idParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error deleting user"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("user id %v deleted successfully", idParam)})
@@ -131,7 +131,7 @@ func (u *UserHandler) GetAllUsers(c *gin.Context) {
 	// Get the total count of users
 	totalCount, err := u.userService.GetUserCount(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "error get user count"})
 		return
 	}
 
@@ -140,7 +140,7 @@ func (u *UserHandler) GetAllUsers(c *gin.Context) {
 
 	listUsers, err := u.userService.GetAllUsers(c, limit, offset)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "error get all users"})
 		return
 	}
 

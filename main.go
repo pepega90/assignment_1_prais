@@ -19,7 +19,7 @@ func main() {
 	r := gin.Default()
 
 	// setup gorm connection
-	dsn := "postgresql://prais:prais@localhost:5432/db_prais"
+	dsn := "postgresql://postgres:pepega90@localhost:5432/db_prais"
 	gormDB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{SkipDefaultTransaction: true})
 	if err != nil {
 		log.Fatalln(err)

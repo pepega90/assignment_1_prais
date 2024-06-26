@@ -222,3 +222,100 @@ func TestUserHandler_UpdateUser(t *testing.T) {
 		assert.Contains(t, w.Body.String(), "error updating user")
 	})
 }
+
+func TestUserHandler_DeleteUser(t *testing.T) {
+	_, ctrl, mockService, userHandler := setupTest(t)
+	defer ctrl.Finish()
+
+	gin.SetMode(gin.TestMode)
+	r := gin.Default()
+	r.DELETE("/users/1", userHandler.DeleteUser)
+
+	t.Run("succesfully delete user", func(t *testing.T) {
+		mockService.EXPECT().DeleteUser(gomock.Any(), gomock.Any()).Return(nil)
+
+		req, _ := http.NewRequest(http.MethodDelete, "/users/1", nil)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Contains(t, w.Body.String(), "deleted successfully")
+	})
+
+	t.Run("gagal delete user", func(t *testing.T) {
+		mockService.EXPECT().DeleteUser(gomock.Any(), gomock.Any()).Return(errors.New("error deleting user"))
+
+		req, _ := http.NewRequest(http.MethodDelete, "/users/1", nil)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Contains(t, w.Body.String(), "error deleting user")
+	})
+}
+
+func TestUserHandler_GetAllUsers(t *testing.T) {
+	_, ctrl, mockService, userHandler := setupTest(t)
+	defer ctrl.Finish()
+
+	gin.SetMode(gin.TestMode)
+	r := gin.Default()
+	r.GET("/users", userHandler.GetAllUsers)
+
+	t.Run("succesfully get all users", func(t *testing.T) {
+		users := []entity.User{
+			{
+				Name:  "pepeg",
+				Email: "pepeg@handsome.com",
+			},
+		}
+
+		page, limit := 1, 1
+		totalCount := 5
+
+		mockService.EXPECT().GetUserCount(gomock.Any()).Return(totalCount, nil)
+		mockService.EXPECT().GetAllUsers(gomock.Any(), limit, (page-1)*limit).Return(users, nil)
+
+		req, _ := http.NewRequest(http.MethodGet, "/users?page=1&limit=1", nil)
+		w := httptest.NewRecorder()
+
+		r.ServeHTTP(w, req)
+
+		expectPagination := handler.PaginationResponse{
+			Users:       users,
+			TotalPages:  (totalCount + limit - 1) / limit,
+			CurrentPage: page,
+		}
+		expectJson, _ := json.Marshal(expectPagination)
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, string(expectJson), w.Body.String())
+	})
+
+	t.Run("error get user count untuk pagination", func(t *testing.T) {
+		mockService.EXPECT().GetUserCount(gomock.Any()).Return(0, errors.New("error get user count"))
+
+		req, _ := http.NewRequest(http.MethodGet, "/users", nil)
+		w := httptest.NewRecorder()
+
+		r.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		assert.Contains(t, w.Body.String(), "error get user count")
+	})
+
+	t.Run("error getting all users", func(t *testing.T) {
+		page, limit := 1, 2
+		totalCount := 5
+
+		mockService.EXPECT().GetUserCount(gomock.Any()).Return(totalCount, nil)
+		mockService.EXPECT().GetAllUsers(gomock.Any(), limit, (page-1)*limit).Return(nil, errors.New("service error"))
+
+		req, _ := http.NewRequest(http.MethodGet, "/users?page=1&limit=2", nil)
+
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		assert.Contains(t, w.Body.String(), "error get all users")
+	})
+}

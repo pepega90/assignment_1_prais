@@ -1,6 +1,9 @@
 package entity
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type ProfileRiskCategory string
 
@@ -19,7 +22,7 @@ type Submission struct {
 	RiskScore      int                 `json:"risk_score"`
 	RiskCategory   ProfileRiskCategory `json:"risk_category"`
 	RiskDefinition string              `json:"risk_definition"`
-	Answers        []Answer            `gorm:"type:jsonb" json:"answers"`
+	Answers        json.RawMessage     `gorm:"type:jsonb" json:"answers"`
 	CreatedAt      time.Time           `json:"created_at"`
 	UpdatedAt      time.Time           `json:"updated_at"`
 }
