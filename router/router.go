@@ -3,6 +3,7 @@ package router
 
 import (
 	"assignment_1/handler"
+	"assignment_1/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,16 +17,16 @@ func SetupRouter(r *gin.Engine,
 	usersPublicEndpoint.GET("/:id", userHandler.GetUser)
 	usersPublicEndpoint.GET("", userHandler.GetAllUsers)
 	usersPublicEndpoint.GET("/", userHandler.GetAllUsers)
-	usersPublicEndpoint.POST("", userHandler.CreateUser)
-	usersPublicEndpoint.POST("/", userHandler.CreateUser)
-	usersPublicEndpoint.PUT("/:id", userHandler.UpdateUser)
-	usersPublicEndpoint.DELETE("/:id", userHandler.DeleteUser)
+	usersPublicEndpoint.POST("", middleware.AuthMiddleware, userHandler.CreateUser)
+	usersPublicEndpoint.POST("/", middleware.AuthMiddleware, userHandler.CreateUser)
+	usersPublicEndpoint.PUT("/:id", middleware.AuthMiddleware, userHandler.UpdateUser)
+	usersPublicEndpoint.DELETE("/:id", middleware.AuthMiddleware, userHandler.DeleteUser)
 
 	submissionsPublicEndpoint := r.Group("/submissions")
 	submissionsPublicEndpoint.GET("/:id", submissionsHandler.GetSubmission)
 	submissionsPublicEndpoint.GET("", submissionsHandler.GetAllSubmissions)
 	submissionsPublicEndpoint.GET("/", submissionsHandler.GetAllSubmissions)
-	submissionsPublicEndpoint.POST("", submissionsHandler.CreateSubmission)
-	submissionsPublicEndpoint.POST("/", submissionsHandler.CreateSubmission)
-	submissionsPublicEndpoint.DELETE("/:id", submissionsHandler.DeleteSubmission)
+	submissionsPublicEndpoint.POST("", middleware.AuthMiddleware, submissionsHandler.CreateSubmission)
+	submissionsPublicEndpoint.POST("/", middleware.AuthMiddleware, submissionsHandler.CreateSubmission)
+	submissionsPublicEndpoint.DELETE("/:id", middleware.AuthMiddleware, submissionsHandler.DeleteSubmission)
 }
