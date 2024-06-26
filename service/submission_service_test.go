@@ -44,6 +44,42 @@ func TestService_CreateSubmission(t *testing.T) {
 	})
 }
 
+func TestCalculateProfileRiskFromAnswers(t *testing.T) {
+	entity.Questions = []entity.Question{
+		{
+			ID: 1,
+			Options: []entity.Option{
+				{Answer: "A", Weight: 10},
+				{Answer: "B", Weight: 20},
+			},
+		},
+		{
+			ID: 2,
+			Options: []entity.Option{
+				{Answer: "C", Weight: 30},
+				{Answer: "D", Weight: 40},
+			},
+		},
+	}
+
+	entity.RiskMapping = []entity.ProfileRisk{
+		{MinScore: 0, MaxScore: 20, Category: "Low", Definition: "Low risk"},
+		{MinScore: 21, MaxScore: 50, Category: "Medium", Definition: "Medium risk"},
+		{MinScore: 51, MaxScore: 100, Category: "High", Definition: "High risk"},
+	}
+
+	answers := []entity.Answer{
+		{QuestionID: 1, Answer: "A"},
+		{QuestionID: 2, Answer: "D"},
+	}
+
+	score, category, definition := service.CalculateProfileRiskFromAnswers(answers)
+
+	assert.Equal(t, 50, score)
+	assert.Equal(t, entity.ProfileRiskCategory("Medium"), category)
+	assert.Equal(t, "Medium risk", definition)
+}
+
 func TestService_GetTotalSubs(t *testing.T) {
 	ctx, ctrl, mockSubsRepo, subsService := setupTestSubs(t)
 	defer ctrl.Finish()

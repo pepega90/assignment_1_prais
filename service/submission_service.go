@@ -54,7 +54,7 @@ func (s *submissionService) CreateSubmission(ctx context.Context, submission *en
 	json.Unmarshal(submission.Answers, &ans)
 
 	// calculate risk profile
-	score, category, definition := calculateProfileRiskFromAnswers(ans)
+	score, category, definition := CalculateProfileRiskFromAnswers(ans)
 
 	submission.RiskScore = score
 	submission.RiskCategory = category
@@ -107,7 +107,7 @@ func (s *submissionService) GetAllSubmissions(ctx context.Context, limit, offset
 
 // TODO: implement logic for profile risk calculation based on score mapping from entity.RiskMapping
 // calculateProfileRiskFromAnswers will be used on submission creation
-func calculateProfileRiskFromAnswers(answers []entity.Answer) (score int, category entity.ProfileRiskCategory, definition string) {
+func CalculateProfileRiskFromAnswers(answers []entity.Answer) (score int, category entity.ProfileRiskCategory, definition string) {
 	// TODO: calculate total score from answers
 	for _, answer := range answers {
 		for _, quest := range entity.Questions {
