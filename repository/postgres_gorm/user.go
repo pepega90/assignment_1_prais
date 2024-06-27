@@ -29,7 +29,9 @@ func (u *userRepository) CreateUser(ctx context.Context, user *entity.User) (ent
 
 func (u *userRepository) GetUserByID(ctx context.Context, id int) (entity.User, error) {
 	var user entity.User
-	err := u.db.First(&user, id).Error
+	err := u.db.Table("users").
+		Select("users.id, users.name, users.email, submissions.risk_score, submissions.risk_category, submissions.risk_definition, users.created_at, users.updated_at").
+		Joins("left join submissions on submissions.user_id = users.id").Order("submissions.id desc").First(&user, id).Error
 	if err != nil {
 		log.Fatalf("Error get user with id = %v", id)
 		return entity.User{}, nil
@@ -69,7 +71,9 @@ func (u *userRepository) GetUserCount(ctx context.Context) (int, error) {
 
 func (u *userRepository) GetAllUsers(ctx context.Context, limit, offset int) ([]entity.User, error) {
 	var listUser []entity.User
-	err := u.db.Limit(limit).Offset(offset).Find(&listUser).Error
+	err := u.db.Table("users").
+		Select("users.id, users.name, users.email, submissions.risk_score, submissions.risk_category, submissions.risk_definition, users.created_at, users.updated_at").
+		Joins("left join submissions on submissions.user_id = users.id").Limit(limit).Offset(offset).Find(&listUser).Error
 	if err != nil {
 		log.Fatalf("error get all users: %v", err.Error())
 		return nil, err
